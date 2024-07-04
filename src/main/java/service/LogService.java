@@ -5,6 +5,7 @@
 package service;
 
 import Interface.iLog;
+import exceptions.dbexception;
 import java.io.IOException;
 import java.util.List;
 import model.Log;
@@ -51,9 +52,10 @@ public class LogService implements  iLog{
                 log.setNgay(rs.getDate("Ngay"));
                 logs.add(log);
             }
-            logger.log(Level.INFO, "Load log data successfully");
+            logger.log(Level.INFO, "Tải lịch sử hoạt động");
         } catch (SQLException e) {
-            logger.log(Level.SEVERE, "Failed to load log data", e);
+            logger.log(Level.SEVERE, "Lỗi khi lấy lịch sử hoạt động", e);
+            throw new dbexception("Lỗi khi lấy lịch sử hoạt động", e);
         }
         return logs;
 
@@ -73,7 +75,7 @@ public class LogService implements  iLog{
             logger.log(Level.INFO, "Added new log entry: {0}", log.toString());
             return rowsAffected;
         } catch (SQLException e) {
-            logger.log(Level.SEVERE, "Error adding new log entry", e);
+            logger.log(Level.SEVERE, "Lỗi khi thêm lịch sử hoạt động", e);
             return 0;
         }   
     }

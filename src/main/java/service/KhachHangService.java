@@ -5,6 +5,8 @@
 package service;
 
 import Interface.iKhachHang;
+import exceptions.dbexception;
+import exceptions.khachhangexception;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
@@ -53,6 +55,7 @@ public class KhachHangService implements iKhachHang {
             logger.log(Level.INFO, "Load thong tin khach hang thanh cong");
         } catch (SQLException e) {
             logger.log(Level.SEVERE, "Load that bai", e);
+            throw new dbexception("Lỗi khi lấy danh sách khách hàng", e);
         }
         return khs;
     }
@@ -72,8 +75,8 @@ public class KhachHangService implements iKhachHang {
             logger.log(Level.INFO, "Added new customer: {0}", kh.toString());
             return rowsAffected;
         } catch (SQLException e) {
-            logger.log(Level.SEVERE, "Error adding new customer", e);
-            return 0;
+            logger.log(Level.SEVERE, "Lỗi khi thêm khách hàng", e);
+            throw new khachhangexception("Lỗi khi thêm khách hàng", e);
         }
     }
 
@@ -92,8 +95,8 @@ public class KhachHangService implements iKhachHang {
             logger.log(Level.INFO, "Updated customer: {0}", kh.toString());
             return rowsAffected;
         } catch (SQLException e) {
-            logger.log(Level.SEVERE, "Error updating customer", e);
-            return 0;
+            logger.log(Level.SEVERE, "Lỗi khi cập nhật khách hàng", e);
+            throw new khachhangexception("Lỗi khi cập nhật khách hàng", e);
         }
     }
 
@@ -109,8 +112,8 @@ public class KhachHangService implements iKhachHang {
             logger.log(Level.INFO, "Deleted customer: {0}", kh.toString());
             return rowsAffected;
         } catch (SQLException e) {
-            logger.log(Level.SEVERE, "lỗi ", e);
-            return 0;
+            logger.log(Level.SEVERE, "lỗi khi xóa khách hàng", e);
+            throw new khachhangexception("Lỗi khi xóa khách hàng", e);  
         }
     }
 }
