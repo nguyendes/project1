@@ -6,26 +6,21 @@ package service;
 
 import Interface.iChiTietDonHang;
 import Interface.iDonHang;
-import exceptions.chitietdonhangexception;
-import exceptions.dbexception;
-import exceptions.donhangexception;
+import exceptions.ChiTietDonHangException;
+import exceptions.DonHangException;
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.sql.*;
+import java.util.*;
 import model.ChiTietDonHang;
 import model.DonHang;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
  * @author maytinh
  */
-public class DonHangService implements iChiTietDonHang, iDonHang{
+public class DonHangService implements iChiTietDonHang, iDonHang {
 
     private final DatabaseConnectionManager dcm;
     private static final Logger logger = Logger.getLogger(DonHangService.class.getName());
@@ -59,14 +54,14 @@ public class DonHangService implements iChiTietDonHang, iDonHang{
             logger.log(Level.INFO, "Load chi tiết đơn hàng thành công");
         } catch (SQLException e) {
             logger.log(Level.SEVERE, "Load chi tiết đơn hàng thất bại", e);
-            throw new dbexception("Lỗi khi lấy danh sách chi tiết đơn hàng", e);
+            throw new ChiTietDonHangException("Lỗi khi lấy danh sách chi tiết đơn hàng", e);
         }
         return ctdhList;
     }
 
     @Override
     public int them(ChiTietDonHang ctdh) {
-        String sql = "INSERT INTO ChiTietDonHang (MaDH, MaSP, SoLuong, Gia) VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO ChiTietDonHang (MaDH, MaSP, SoLuong, GiaBan, MaKM) VALUES (?, ?, ?, ?, ?)";
         try (Connection cnt = dcm.getConnection();
              PreparedStatement pre = cnt.prepareStatement(sql)) {
 
@@ -81,27 +76,28 @@ public class DonHangService implements iChiTietDonHang, iDonHang{
             return rowsAffected;
         } catch (SQLException e) {
             logger.log(Level.SEVERE, "Lỗi khi thêm chi tiết đơn hàng", e);
-            throw new chitietdonhangexception("Lỗi khi thêm chi tiết đơn hàng", e);
+            throw new ChiTietDonHangException("Lỗi khi thêm chi tiết đơn hàng", e);
         }
     }
 
     @Override
     public int capnhat(ChiTietDonHang ctdh) {
-        String sql = "UPDATE ChiTietDonHang SET SoLuong = ?, Gia = ? WHERE MaDH = ? AND MaSP = ?";
+        String sql = "UPDATE ChiTietDonHang SET SoLuong = ?, GiaBan = ?, MaKM = ? WHERE MaDH = ? AND MaSP = ?";
         try (Connection cnt = dcm.getConnection();
              PreparedStatement pre = cnt.prepareStatement(sql)) {
 
             pre.setInt(1, ctdh.getSoLuong());
             pre.setDouble(2, ctdh.getGiaBan());
-            pre.setString(3, ctdh.getMaDH());
-            pre.setString(4, ctdh.getMaSP());
+            pre.setString(3, ctdh.getMaKM());
+            pre.setString(4, ctdh.getMaDH());
+            pre.setString(5, ctdh.getMaSP());
 
             int rowsAffected = pre.executeUpdate();
             logger.log(Level.INFO, "Cập nhật chi tiết đơn hàng: {0}", ctdh.toString());
             return rowsAffected;
         } catch (SQLException e) {
             logger.log(Level.SEVERE, "Lỗi khi cập nhật chi tiết đơn hàng", e);
-            throw new chitietdonhangexception("Lỗi khi cập nhật chi tiết đơn hàng", e);
+            throw new ChiTietDonHangException("Lỗi khi cập nhật chi tiết đơn hàng", e);
         }
     }
 
@@ -119,7 +115,7 @@ public class DonHangService implements iChiTietDonHang, iDonHang{
             return rowsAffected;
         } catch (SQLException e) {
             logger.log(Level.SEVERE, "Lỗi khi xóa chi tiết đơn hàng", e);
-            throw new chitietdonhangexception("Lỗi khi xóa chi tiết đơn hàng", e);
+            throw new ChiTietDonHangException("Lỗi khi xóa chi tiết đơn hàng", e);
         }
     }
 
@@ -143,7 +139,7 @@ public class DonHangService implements iChiTietDonHang, iDonHang{
             logger.log(Level.INFO, "Load đơn hàng thành công");
         } catch (SQLException e) {
             logger.log(Level.SEVERE, "Load đơn hàng thất bại", e);
-            throw new dbexception("Lỗi khi lấy danh sách đơn hàng", e);
+            throw new DonHangException("Lỗi khi lấy danh sách đơn hàng", e);
         }
         return dhList;
     }
@@ -164,7 +160,7 @@ public class DonHangService implements iChiTietDonHang, iDonHang{
             return rowsAffected;
         } catch (SQLException e) {
             logger.log(Level.SEVERE, "Lỗi khi thêm đơn hàng", e);
-            throw new donhangexception("Lỗi khi thêm đơn hàng", e);
+            throw new DonHangException("Lỗi khi thêm đơn hàng", e);
         }
     }
 
@@ -184,7 +180,7 @@ public class DonHangService implements iChiTietDonHang, iDonHang{
             return rowsAffected;
         } catch (SQLException e) {
             logger.log(Level.SEVERE, "Lỗi khi cập nhật đơn hàng", e);
-            throw new donhangexception("Lỗi khi cập nhật đơn hàng", e);
+            throw new DonHangException("Lỗi khi cập nhật đơn hàng", e);
         }
     }
 
@@ -201,7 +197,7 @@ public class DonHangService implements iChiTietDonHang, iDonHang{
             return rowsAffected;
         } catch (SQLException e) {
             logger.log(Level.SEVERE, "Lỗi khi xóa đơn hàng", e);
-            throw new donhangexception("Lỗi khi xóa đơn hàng", e);
+            throw new DonHangException("Lỗi khi xóa đơn hàng", e);
         }
     }
 }

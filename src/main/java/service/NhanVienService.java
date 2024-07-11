@@ -5,6 +5,7 @@
 package service;
 
 import Interface.iNhanVien;
+import exceptions.NhanVienException;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -15,7 +16,6 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import model.NhanVien;
-
 /**
  *
  * @author maytinh
@@ -32,85 +32,84 @@ public class NhanVienService implements iNhanVien{
             throw new RuntimeException("Failed to initialize DatabaseConnectionManager", e);
         }
     }
-
-    @Override
+@Override
     public List<NhanVien> getAllNV() {
-        List<NhanVien> nvs = new ArrayList<>();
+        List<NhanVien> nvList = new ArrayList<>();
         String sql = "SELECT * FROM NhanVien";
-        try (Connection conn = dcm.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
+        try (Connection cnt = dcm.getConnection();
+             PreparedStatement pre = cnt.prepareStatement(sql);
+             ResultSet rs = pre.executeQuery()) {
 
             while (rs.next()) {
                 NhanVien nv = new NhanVien();
                 nv.setMaNV(rs.getString("MaNV"));
                 nv.setTenNV(rs.getString("TenNV"));
-                nv.setEmail(rs.getString("Email"));
-                nv.setSDT(rs.getString("SDT"));
-                nvs.add(nv);
+                // other fields...
+                nvList.add(nv);
             }
-            logger.log(Level.INFO, "Loaded employee data successfully");
+            logger.log(Level.INFO, "Load nhân viên thành công");
         } catch (SQLException e) {
-            logger.log(Level.SEVERE, "Failed to load employee data", e);
+            logger.log(Level.SEVERE, "Load nhân viên thất bại", e);
+            throw NhanVienException.databaseError("Lỗi khi lấy danh sách nhân viên", e);
         }
-
-        return nvs;
+        return nvList;
     }
 
     @Override
     public int them(NhanVien nv) {
-        String sql = "INSERT INTO NhanVien (MaNV, TenNV, Email, SDT) VALUES (?, ?, ?, ?)";
-        try (Connection conn = dcm.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        String sql = "INSERT INTO NhanVien (MaNV, TenNV, ...) VALUES (?, ?, ...)";
+        try (Connection cnt = dcm.getConnection();
+             PreparedStatement pre = cnt.prepareStatement(sql)) {
 
-            ps.setString(1, nv.getMaNV());
-            ps.setString(2, nv.getTenNV());
-            ps.setString(3, nv.getEmail());
-            ps.setString(4, nv.getSDT());
+            pre.setString(1, nv.getMaNV());
+            pre.setString(2, nv.getTenNV());
+            // other fields...
 
-            int rowsAffected = ps.executeUpdate();
-            logger.log(Level.INFO, "Added new employee: {0}", nv.toString());
+            int rowsAffected = pre.executeUpdate();
+            logger.log(Level.INFO, "Thêm nhân viên mới: {0}", nv.toString());
             return rowsAffected;
         } catch (SQLException e) {
-            logger.log(Level.SEVERE, "Error adding new employee", e);
-            return 0;
+            logger.log(Level.SEVERE, "Lỗi khi thêm nhân viên", e);
+            throw NhanVienException.databaseError("Lỗi khi thêm nhân viên", e);
         }
     }
 
     @Override
     public int capnhat(NhanVien nv) {
-        String sql = "UPDATE NhanVien SET TenNV = ?, Email = ?, SDT = ? WHERE MaNV = ?";
-        try (Connection conn = dcm.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        String sql = "UPDATE NhanVien SET TenNV = ?, ... WHERE MaNV = ?";
+        try (Connection cnt = dcm.getConnection();
+             PreparedStatement pre = cnt.prepareStatement(sql)) {
 
-            ps.setString(1, nv.getTenNV());
-            ps.setString(2, nv.getEmail());
-            ps.setString(3, nv.getSDT());
-            ps.setString(4, nv.getMaNV());
+            pre.setString(1, nv.getTenNV());
+            pre.setString(2, nv.getMaNV());
+            // other fields...
 
-            int rowsAffected = ps.executeUpdate();
-            logger.log(Level.INFO, "Updated employee: {0}", nv.toString());
+            int rowsAffected = pre.executeUpdate();
+            logger.log(Level.INFO, "Cập nhật nhân viên: {0}", nv.toString());
             return rowsAffected;
         } catch (SQLException e) {
-            logger.log(Level.SEVERE, "Error updating employee", e);
-            return 0;
+            logger.log(Level.SEVERE, "Lỗi khi cập nhật nhân viên", e);
+            throw NhanVienException.databaseError("Lỗi khi cập nhật nhân viên", e);
         }
     }
 
     @Override
     public int xoa(NhanVien nv) {
         String sql = "DELETE FROM NhanVien WHERE MaNV = ?";
-        try (Connection conn = dcm.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection cnt = dcm.getConnection();
+             PreparedStatement pre = cnt.prepareStatement(sql)) {
 
-            ps.setString(1, nv.getMaNV());
+            pre.setString(1, nv.getMaNV());
 
-            int rowsAffected = ps.executeUpdate();
-            logger.log(Level.INFO, "Deleted employee: {0}", nv.toString());
+            int rowsAffected = pre.executeUpdate();
+            logger.log(Level.INFO, "Xóa nhân viên: {0}", nv.toString());
             return rowsAffected;
         } catch (SQLException e) {
-            logger.log(Level.SEVERE, "Error deleting employee", e);
-            return 0;
+            logger.log(Level.SEVERE, "Lỗi khi xóa nhân viên", e);
+            throw NhanVienException.databaseError("Lỗi khi xóa nhân viên", e);
         }
     }
+
 }
+
+

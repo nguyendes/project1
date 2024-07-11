@@ -6,19 +6,17 @@ package service;
 
 import Interface.iKhachHang;
 import exceptions.dbexception;
-import exceptions.khachhangexception;
+import exceptions.KhachHangException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Properties;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import model.KhachHang;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Service for handling customer operations.
@@ -35,33 +33,35 @@ public class KhachHangService implements iKhachHang {
         }
     }
 
-
     @Override
     public List<KhachHang> getAllKH() {
         List<KhachHang> khs = new ArrayList<>();
         String sql = "SELECT * FROM KhachHang";
         try (Connection cnt = dcm.getConnection();
              PreparedStatement pre = cnt.prepareStatement(sql);
-             ResultSet rss = pre.executeQuery()) {
+             ResultSet rs = pre.executeQuery()) {
 
-            while (rss.next()) {
+            while (rs.next()) {
                 KhachHang kh = new KhachHang();
-                kh.setMaKH(rss.getString(1));
-                kh.setTenKH(rss.getString(2));
-                kh.setEmail(rss.getString(3));
-                kh.setSDT(rss.getString(4));
+                kh.setMaKH(rs.getString(1));
+                kh.setTenKH(rs.getString(2));
+                kh.setEmail(rs.getString(3));
+                kh.setSDT(rs.getString(4));
                 khs.add(kh);
             }
-            logger.log(Level.INFO, "Load thong tin khach hang thanh cong");
+            logger.log(Level.INFO, "Loaded customer information successfully");
         } catch (SQLException e) {
-            logger.log(Level.SEVERE, "Load that bai", e);
-            throw new dbexception("Lỗi khi lấy danh sách khách hàng", e);
+            logger.log(Level.SEVERE, "Failed to load customer information", e);
+            throw new dbexception("Error fetching customer list", e);
         }
         return khs;
     }
 
     @Override
     public int them(KhachHang kh) {
+        if (kh == null) {
+            throw KhachHangException.invalidCustomerData("Customer object is null");
+        }
         String sql = "INSERT INTO KhachHang (MaKH, TenKH, Email, SDT) VALUES (?, ?, ?, ?)";
         try (Connection cnt = dcm.getConnection();
              PreparedStatement pre = cnt.prepareStatement(sql)) {
@@ -75,13 +75,19 @@ public class KhachHangService implements iKhachHang {
             logger.log(Level.INFO, "Added new customer: {0}", kh.toString());
             return rowsAffected;
         } catch (SQLException e) {
-            logger.log(Level.SEVERE, "Lỗi khi thêm khách hàng", e);
-            throw new khachhangexception("Lỗi khi thêm khách hàng", e);
+             if (e.getErrorCode() == 1062) { 
+                throw KhachHangException.duplicateCustomerEntry(kh.getMaKH());
+            }
+            logger.log(Level.SEVERE, "Error adding customer", e);
+            throw new KhachHangException("Error adding customer", e);
         }
     }
 
     @Override
     public int capnhat(KhachHang kh) {
+        if (kh == null) {
+            throw KhachHangException.invalidCustomerData("Customer object is null");
+        }
         String sql = "UPDATE KhachHang SET TenKH = ?, Email = ?, SDT = ? WHERE MaKH = ?";
         try (Connection cnt = dcm.getConnection();
              PreparedStatement pre = cnt.prepareStatement(sql)) {
@@ -95,13 +101,19 @@ public class KhachHangService implements iKhachHang {
             logger.log(Level.INFO, "Updated customer: {0}", kh.toString());
             return rowsAffected;
         } catch (SQLException e) {
-            logger.log(Level.SEVERE, "Lỗi khi cập nhật khách hàng", e);
-            throw new khachhangexception("Lỗi khi cập nhật khách hàng", e);
+            if (e.getErrorCode() == 0b1111011) {
+                throw KhachHangException.customerNotFound(kh.getMaKH());
+            }
+            logger.log(Level.SEVERE, "Error updating customer", e);
+            throw new KhachHangException("Error updating customer", e);
         }
     }
 
     @Override
     public int xoa(KhachHang kh) {
+        if (kh == null || kh.getMaKH() == null || kh.getMaKH().isEmpty()) {
+            throw KhachHangException.invalidCustomerData("Customer ID is null or empty");
+        }
         String sql = "DELETE FROM KhachHang WHERE MaKH = ?";
         try (Connection cnt = dcm.getConnection();
              PreparedStatement pre = cnt.prepareStatement(sql)) {
@@ -109,12 +121,14 @@ public class KhachHangService implements iKhachHang {
             pre.setString(1, kh.getMaKH());
 
             int rowsAffected = pre.executeUpdate();
+            if (rowsAffected == 0) {
+                throw KhachHangException.customerNotFound(kh.getMaKH());
+            }
             logger.log(Level.INFO, "Deleted customer: {0}", kh.toString());
             return rowsAffected;
         } catch (SQLException e) {
-            logger.log(Level.SEVERE, "lỗi khi xóa khách hàng", e);
-            throw new khachhangexception("Lỗi khi xóa khách hàng", e);  
+            logger.log(Level.SEVERE, "Error deleting customer", e);
+            throw new KhachHangException("Error deleting customer", e);
         }
     }
 }
-

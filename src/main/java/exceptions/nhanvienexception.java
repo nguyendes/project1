@@ -9,13 +9,47 @@ package exceptions;
  * @author maytinh
  */
 
-public class nhanvienexception extends RuntimeException {
-    public nhanvienexception(String message) {
+public class NhanVienException extends RuntimeException {
+    private final int errorCode;
+
+    public NhanVienException(String message) {
         super(message);
+        this.errorCode = -1; // default error code
     }
 
-    public nhanvienexception(String message, Throwable cause) {
+    public NhanVienException(String message, Throwable cause) {
         super(message, cause);
+        this.errorCode = -1; // default error code
+    }
+
+    public NhanVienException(String message, int errorCode) {
+        super(message);
+        this.errorCode = errorCode;
+    }
+
+    public NhanVienException(String message, Throwable cause, int errorCode) {
+        super(message, cause);
+        this.errorCode = errorCode;
+    }
+
+    public int getErrorCode() {
+        return errorCode;
+    }
+
+    public static NhanVienException notFound(String id) {
+        return new NhanVienException("Nhân viên không tồn tại: " + id, 404);
+    }
+
+    public static NhanVienException duplicateEntry(String id) {
+        return new NhanVienException("Nhân viên đã tồn tại: " + id, 409);
+    }
+
+    public static NhanVienException databaseError(String message, Throwable cause) {
+        return new NhanVienException("Lỗi cơ sở dữ liệu: " + message, cause, 500);
+    }
+
+    public static NhanVienException validationError(String message) {
+        return new NhanVienException("Lỗi xác thực: " + message, 400);
     }
 }
 

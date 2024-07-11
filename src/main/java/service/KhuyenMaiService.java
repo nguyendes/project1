@@ -7,7 +7,7 @@ package service;
 import Interface.iChiTietKhuyenMai;
 import Interface.iKhuyenMai;
 import exceptions.dbexception;
-import exceptions.khuyenmaiexception;
+import exceptions.KhuyenMaiException;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -24,7 +24,8 @@ import model.KhuyenMai;
  *
  * @author maytinh
  */
-public class KhuyenMaiService implements iChiTietKhuyenMai,iKhuyenMai{
+
+public class KhuyenMaiService implements iChiTietKhuyenMai, iKhuyenMai {
 
     private final DatabaseConnectionManager dcm;
     private static final Logger logger = Logger.getLogger(KhuyenMaiService.class.getName());
@@ -37,7 +38,6 @@ public class KhuyenMaiService implements iChiTietKhuyenMai,iKhuyenMai{
         }
     }
 
-    // ChiTietKhuyenMai Methods
     @Override
     public List<ChiTietKM> getAllCTKM() {
         List<ChiTietKM> ctkmList = new ArrayList<>();
@@ -66,7 +66,7 @@ public class KhuyenMaiService implements iChiTietKhuyenMai,iKhuyenMai{
 
     @Override
     public int them(ChiTietKM ctkm) {
-        String sql = "INSERT INTO ChiTietKhuyenMai (MaKM, MaSP, GiamGia) VALUES (?, ?, ?)";
+        String sql = "INSERT INTO ChiTietKhuyenMai (MaKM, MaSP, NgayBatDau, NgayKetThuc, TiLeGiam, GiamToiDa) VALUES (?, ?, ?, ?, ?, ?)";
         try (Connection cnt = dcm.getConnection();
              PreparedStatement pre = cnt.prepareStatement(sql)) {
 
@@ -82,27 +82,29 @@ public class KhuyenMaiService implements iChiTietKhuyenMai,iKhuyenMai{
             return rowsAffected;
         } catch (SQLException e) {
             logger.log(Level.SEVERE, "Lỗi khi thêm chi tiết khuyến mãi", e);
-            throw new khuyenmaiexception("Lỗi khi thêm chi tiết khuyến mãi", e);
+            throw new KhuyenMaiException("Lỗi khi thêm chi tiết khuyến mãi", e);
         }
     }
 
     @Override
     public int capnhat(ChiTietKM ctkm) {
-        String sql = "UPDATE ChiTietKhuyenMai SET GiamGia = ? WHERE MaKM = ? AND MaSP = ?";
+        String sql = "UPDATE ChiTietKhuyenMai SET NgayBatDau = ?, NgayKetThuc = ?, TiLeGiam = ?, GiamToiDa = ? WHERE MaKM = ? AND MaSP = ?";
         try (Connection cnt = dcm.getConnection();
              PreparedStatement pre = cnt.prepareStatement(sql)) {
 
-            pre.setDouble(1, ctkm.getGiamToiDa());
-            pre.setString(2, ctkm.getMaKM());
-            pre.setString(3, ctkm.getMaSP());
-            pre.setDate(2, new java.sql.Date(ctkm.getNgayBatDau().getTime()));
-            pre.setDate(3, new java.sql.Date(ctkm.getNgayKetThuc().getTime()));
+            pre.setDate(1, new java.sql.Date(ctkm.getNgayBatDau().getTime()));
+            pre.setDate(2, new java.sql.Date(ctkm.getNgayKetThuc().getTime()));
+            pre.setInt(3, ctkm.getTiLeGiam());
+            pre.setDouble(4, ctkm.getGiamToiDa());
+            pre.setString(5, ctkm.getMaKM());
+            pre.setString(6, ctkm.getMaSP());
+
             int rowsAffected = pre.executeUpdate();
             logger.log(Level.INFO, "Cập nhật chi tiết khuyến mãi: {0}", ctkm.toString());
             return rowsAffected;
         } catch (SQLException e) {
             logger.log(Level.SEVERE, "Lỗi khi cập nhật chi tiết khuyến mãi", e);
-            throw new khuyenmaiexception("Lỗi khi cập nhật chi tiết khuyến mãi", e);
+            throw new KhuyenMaiException("Lỗi khi cập nhật chi tiết khuyến mãi", e);
         }
     }
 
@@ -120,7 +122,7 @@ public class KhuyenMaiService implements iChiTietKhuyenMai,iKhuyenMai{
             return rowsAffected;
         } catch (SQLException e) {
             logger.log(Level.SEVERE, "Lỗi khi xóa chi tiết khuyến mãi", e);
-            throw new khuyenmaiexception("Lỗi khi xóa chi tiết khuyến mãi", e);
+            throw new KhuyenMaiException("Lỗi khi xóa chi tiết khuyến mãi", e);
         }
     }
 
@@ -142,7 +144,7 @@ public class KhuyenMaiService implements iChiTietKhuyenMai,iKhuyenMai{
             logger.log(Level.INFO, "Load khuyến mãi thành công");
         } catch (SQLException e) {
             logger.log(Level.SEVERE, "Load khuyến mãi thất bại", e);
-            throw new khuyenmaiexception("Lỗi khi lấy danh sách khuyến mãi", e);
+            throw new KhuyenMaiException("Lỗi khi lấy danh sách khuyến mãi", e);
         }
         return kmList;
     }
@@ -155,13 +157,14 @@ public class KhuyenMaiService implements iChiTietKhuyenMai,iKhuyenMai{
 
             pre.setString(1, km.getMaKM());
             pre.setString(2, km.getTenKM());
-            
+
             int rowsAffected = pre.executeUpdate();
             logger.log(Level.INFO, "Thêm khuyến mãi mới: {0}", km.toString());
             return rowsAffected;
         } catch (SQLException e) {
+
             logger.log(Level.SEVERE, "Lỗi khi thêm khuyến mãi", e);
-            throw new khuyenmaiexception("Lỗi khi thêm khuyến mãi", e);
+            throw new KhuyenMaiException("Lỗi khi thêm khuyến mãi", e);
         }
     }
 
@@ -172,16 +175,16 @@ public class KhuyenMaiService implements iChiTietKhuyenMai,iKhuyenMai{
              PreparedStatement pre = cnt.prepareStatement(sql)) {
 
             pre.setString(1, km.getTenKM());
-            pre.setString(4, km.getMaKM());
-
+            pre.setString(2, km.getMaKM());
             int rowsAffected = pre.executeUpdate();
             logger.log(Level.INFO, "Cập nhật khuyến mãi: {0}", km.toString());
             return rowsAffected;
-        } catch (SQLException e) {
+        }catch (SQLException e){ 
             logger.log(Level.SEVERE, "Lỗi khi cập nhật khuyến mãi", e);
-            throw new khuyenmaiexception("Lỗi khi cập nhật khuyến mãi", e);
+            throw new KhuyenMaiException("Lỗi khi cập nhật khuyến mãi", e);
         }
     }
+    
 
     @Override
     public int xoa(KhuyenMai km) {
@@ -196,7 +199,7 @@ public class KhuyenMaiService implements iChiTietKhuyenMai,iKhuyenMai{
             return rowsAffected;
         } catch (SQLException e) {
             logger.log(Level.SEVERE, "Lỗi khi xóa khuyến mãi", e);
-            throw new khuyenmaiexception("Lỗi khi xóa khuyến mãi", e);
+            throw new KhuyenMaiException("Lỗi khi xóa khuyến mãi", e);
         }
     }
 }
