@@ -5,7 +5,6 @@
 package service;
 
 import Interface.iChiTietKhuyenMai;
-import Interface.iKhuyenMai;
 import exceptions.dbexception;
 import exceptions.KhuyenMaiException;
 import java.io.IOException;
@@ -18,14 +17,9 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import model.ChiTietKM;
-import model.KhuyenMai;
 
-/**
- *
- * @author maytinh
- */
 
-public class KhuyenMaiService implements iChiTietKhuyenMai, iKhuyenMai {
+public class KhuyenMaiService implements iChiTietKhuyenMai {
 
     private final DatabaseConnectionManager dcm;
     private static final Logger logger = Logger.getLogger(KhuyenMaiService.class.getName());
@@ -41,7 +35,9 @@ public class KhuyenMaiService implements iChiTietKhuyenMai, iKhuyenMai {
     @Override
     public List<ChiTietKM> getAllCTKM() {
         List<ChiTietKM> ctkmList = new ArrayList<>();
-        String sql = "SELECT * FROM ChiTietKhuyenMai";
+        String sql = "SELECT c.MaKM, k.TenKM, c.MaSP, c.NgayBatDau, c.NgayKetThuc, c.TiLeGiam, c.GiamToiDa " +
+                     "FROM ChiTietKM c INNER JOIN KhuyenMai k ON c.MaKM = k.MaKM";
+
         try (Connection cnt = dcm.getConnection();
              PreparedStatement pre = cnt.prepareStatement(sql);
              ResultSet rs = pre.executeQuery()) {
@@ -66,7 +62,7 @@ public class KhuyenMaiService implements iChiTietKhuyenMai, iKhuyenMai {
 
     @Override
     public int them(ChiTietKM ctkm) {
-        String sql = "INSERT INTO ChiTietKhuyenMai (MaKM, MaSP, NgayBatDau, NgayKetThuc, TiLeGiam, GiamToiDa) VALUES (?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO ChiTietKM (MaKM, MaSP, NgayBatDau, NgayKetThuc, TiLeGiam, GiamToiDa) VALUES (?, ?, ?, ?, ?, ?)";
         try (Connection cnt = dcm.getConnection();
              PreparedStatement pre = cnt.prepareStatement(sql)) {
 
@@ -88,7 +84,7 @@ public class KhuyenMaiService implements iChiTietKhuyenMai, iKhuyenMai {
 
     @Override
     public int capnhat(ChiTietKM ctkm) {
-        String sql = "UPDATE ChiTietKhuyenMai SET NgayBatDau = ?, NgayKetThuc = ?, TiLeGiam = ?, GiamToiDa = ? WHERE MaKM = ? AND MaSP = ?";
+        String sql = "UPDATE ChiTietKM SET NgayBatDau = ?, NgayKetThuc = ?, TiLeGiam = ?, GiamToiDa = ? WHERE MaKM = ? AND MaSP = ?";
         try (Connection cnt = dcm.getConnection();
              PreparedStatement pre = cnt.prepareStatement(sql)) {
 
@@ -110,7 +106,7 @@ public class KhuyenMaiService implements iChiTietKhuyenMai, iKhuyenMai {
 
     @Override
     public int xoa(ChiTietKM ctkm) {
-        String sql = "DELETE FROM ChiTietKhuyenMai WHERE MaKM = ? AND MaSP = ?";
+        String sql = "DELETE FROM ChiTietKM WHERE MaKM = ? AND MaSP = ?";
         try (Connection cnt = dcm.getConnection();
              PreparedStatement pre = cnt.prepareStatement(sql)) {
 
@@ -123,83 +119,6 @@ public class KhuyenMaiService implements iChiTietKhuyenMai, iKhuyenMai {
         } catch (SQLException e) {
             logger.log(Level.SEVERE, "Lỗi khi xóa chi tiết khuyến mãi", e);
             throw new KhuyenMaiException("Lỗi khi xóa chi tiết khuyến mãi", e);
-        }
-    }
-
-    // KhuyenMai Methods
-    @Override
-    public List<KhuyenMai> getAllKM() {
-        List<KhuyenMai> kmList = new ArrayList<>();
-        String sql = "SELECT * FROM KhuyenMai";
-        try (Connection cnt = dcm.getConnection();
-             PreparedStatement pre = cnt.prepareStatement(sql);
-             ResultSet rs = pre.executeQuery()) {
-
-            while (rs.next()) {
-                KhuyenMai km = new KhuyenMai();
-                km.setMaKM(rs.getString("MaKM"));
-                km.setTenKM(rs.getString("TenKM"));
-                kmList.add(km);
-            }
-            logger.log(Level.INFO, "Load khuyến mãi thành công");
-        } catch (SQLException e) {
-            logger.log(Level.SEVERE, "Load khuyến mãi thất bại", e);
-            throw new KhuyenMaiException("Lỗi khi lấy danh sách khuyến mãi", e);
-        }
-        return kmList;
-    }
-
-    @Override
-    public int them(KhuyenMai km) {
-        String sql = "INSERT INTO KhuyenMai (MaKM, TenKM, NgayBatDau, NgayKetThuc) VALUES (?, ?, ?, ?)";
-        try (Connection cnt = dcm.getConnection();
-             PreparedStatement pre = cnt.prepareStatement(sql)) {
-
-            pre.setString(1, km.getMaKM());
-            pre.setString(2, km.getTenKM());
-
-            int rowsAffected = pre.executeUpdate();
-            logger.log(Level.INFO, "Thêm khuyến mãi mới: {0}", km.toString());
-            return rowsAffected;
-        } catch (SQLException e) {
-
-            logger.log(Level.SEVERE, "Lỗi khi thêm khuyến mãi", e);
-            throw new KhuyenMaiException("Lỗi khi thêm khuyến mãi", e);
-        }
-    }
-
-    @Override
-    public int capnhat(KhuyenMai km) {
-        String sql = "UPDATE KhuyenMai SET TenKM = ?, NgayBatDau = ?, NgayKetThuc = ? WHERE MaKM = ?";
-        try (Connection cnt = dcm.getConnection();
-             PreparedStatement pre = cnt.prepareStatement(sql)) {
-
-            pre.setString(1, km.getTenKM());
-            pre.setString(2, km.getMaKM());
-            int rowsAffected = pre.executeUpdate();
-            logger.log(Level.INFO, "Cập nhật khuyến mãi: {0}", km.toString());
-            return rowsAffected;
-        }catch (SQLException e){ 
-            logger.log(Level.SEVERE, "Lỗi khi cập nhật khuyến mãi", e);
-            throw new KhuyenMaiException("Lỗi khi cập nhật khuyến mãi", e);
-        }
-    }
-    
-
-    @Override
-    public int xoa(KhuyenMai km) {
-        String sql = "DELETE FROM KhuyenMai WHERE MaKM = ?";
-        try (Connection cnt = dcm.getConnection();
-             PreparedStatement pre = cnt.prepareStatement(sql)) {
-
-            pre.setString(1, km.getMaKM());
-
-            int rowsAffected = pre.executeUpdate();
-            logger.log(Level.INFO, "Xóa khuyến mãi: {0}", km.toString());
-            return rowsAffected;
-        } catch (SQLException e) {
-            logger.log(Level.SEVERE, "Lỗi khi xóa khuyến mãi", e);
-            throw new KhuyenMaiException("Lỗi khi xóa khuyến mãi", e);
         }
     }
 }

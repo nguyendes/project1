@@ -4,38 +4,32 @@
  */
 package model;
 
-import java.sql.Date;
+import java.util.Date;
 
-/**
- *
- * @author maytinh
- */
 public class ChiTietKM {
     private String MaKM;
+    private String TenKM; // Thêm thuộc tính này
     private String MaSP;
     private Date NgayBatDau;
     private Date NgayKetThuc;
     private int TiLeGiam;
     private double GiamToiDa;
 
-    public ChiTietKM() {
-    }
-
-    public ChiTietKM(String MaKM, String MaSP, Date NgayBatDau, Date NgayKetThuc, int TiLeGiam, double GiamToiDa) {
-        this.MaKM = MaKM;
-        this.MaSP = MaSP;
-        this.NgayBatDau = NgayBatDau;
-        this.NgayKetThuc = NgayKetThuc;
-        this.TiLeGiam = TiLeGiam;
-        this.GiamToiDa = GiamToiDa;
-    }
-
+    // Các phương thức getter và setter
     public String getMaKM() {
         return MaKM;
     }
 
     public void setMaKM(String MaKM) {
         this.MaKM = MaKM;
+    }
+
+    public String getTenKM() {
+        return TenKM;
+    }
+
+    public void setTenKM(String TenKM) {
+        this.TenKM = TenKM;
     }
 
     public String getMaSP() {
@@ -78,12 +72,7 @@ public class ChiTietKM {
         this.GiamToiDa = GiamToiDa;
     }
 
-    @Override
-    public String toString() {
-        return "ChiTietKM{" + "MaKM=" + MaKM + ", MaSP=" + MaSP + ", NgayBatDau=" + NgayBatDau + ", NgayKetThuc=" + NgayKetThuc + ", TiLeGiam=" + TiLeGiam + ", GiamToiDa=" + GiamToiDa + '}';
-    }
-    
-    public Object[] toDataRow(){
-        return new Object[]{this.getMaKM(),this.getMaSP(),this.getNgayBatDau(),this.getNgayKetThuc(),this.getTiLeGiam(),this.getGiamToiDa()};
+    public Object[] toDataRow() {
+        return new Object[]{MaKM, TenKM, MaSP, NgayBatDau, NgayKetThuc, TiLeGiam, GiamToiDa};
     }
 }

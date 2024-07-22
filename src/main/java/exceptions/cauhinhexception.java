@@ -21,7 +21,6 @@ public class CauHinhException extends RuntimeException {
         super(cause);
     }
 
-    // Optionally, you can add more methods to handle specific cases
     public static CauHinhException configurationNotFound(String configName) {
         return new CauHinhException("Configuration not found: " + configName);
     }

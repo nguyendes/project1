@@ -131,7 +131,7 @@ public class DonHangService implements iChiTietDonHang, iDonHang {
             while (rs.next()) {
                 DonHang dh = new DonHang();
                 dh.setMaDH(rs.getString("MaDH"));
-                dh.setNgay(rs.getDate("NgayLap"));
+                dh.setNgay(rs.getDate("Ngay"));
                 dh.setMaKH(rs.getString("MaKH"));
                 dh.setTongTien(rs.getDouble("TongTien"));
                 dhList.add(dh);
@@ -146,7 +146,7 @@ public class DonHangService implements iChiTietDonHang, iDonHang {
 
     @Override
     public int them(DonHang dh) {
-        String sql = "INSERT INTO DonHang (MaDH, NgayLap, MaKH, TongTien) VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO DonHang (MaDH, Ngay, MaKH, TongTien) VALUES (?, ?, ?, ?)";
         try (Connection cnt = dcm.getConnection();
              PreparedStatement pre = cnt.prepareStatement(sql)) {
 

@@ -14,12 +14,12 @@ public class NhanVienException extends RuntimeException {
 
     public NhanVienException(String message) {
         super(message);
-        this.errorCode = -1; // default error code
+        this.errorCode = -1; 
     }
 
     public NhanVienException(String message, Throwable cause) {
         super(message, cause);
-        this.errorCode = -1; // default error code
+        this.errorCode = -1;
     }
 
     public NhanVienException(String message, int errorCode) {

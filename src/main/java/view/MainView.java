@@ -4,17 +4,50 @@
  */
 package view;
 
+import java.util.ArrayList;
+import javax.swing.table.DefaultTableModel;
+import model.ChiTietKM;
+import service.KhuyenMaiService;
+
 /**
- *
- * @author maytinh
+ * MainView class for displaying the main interface with a JTable
  */
 public class MainView extends javax.swing.JFrame {
+
+    private KhuyenMaiService kmsv = new KhuyenMaiService();
+    private DefaultTableModel mol;
 
     /**
      * Creates new form MainView
      */
     public MainView() {
         initComponents();
+        this.setLocationRelativeTo(null);
+        this.fillTable((ArrayList<ChiTietKM>) kmsv.getAllCTKM());
+    }
+
+    /**
+     * Initialize the components of the form
+     */
+   
+      /**
+     * Fill the table with data from the database
+     * @param list List of ChiTietKM objects
+     */
+    public void fillTable(ArrayList<ChiTietKM> list) {
+        mol = (DefaultTableModel) jTable1.getModel();
+        mol.setRowCount(0);
+        for (ChiTietKM x : list) {
+            mol.addRow(new Object[]{
+                x.getMaKM(),
+                x.getTenKM(), // Ensure that ChiTietKM model has getTenKM() method or equivalent
+                x.getMaSP(),
+                x.getNgayBatDau(),
+                x.getNgayKetThuc(),
+                x.getTiLeGiam(),
+                x.getGiamToiDa()
+            });
+        }
     }
 
     /**
@@ -26,8 +59,26 @@ public class MainView extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        jScrollPane1 = new javax.swing.JScrollPane();
+        jTable1 = new javax.swing.JTable();
+
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         getContentPane().setLayout(new java.awt.CardLayout());
+
+        jTable1.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null}
+            },
+            new String [] {
+                "Title 1", "Title 2", "Title 3", "Title 4"
+            }
+        ));
+        jScrollPane1.setViewportView(jTable1);
+
+        getContentPane().add(jScrollPane1, "card2");
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
@@ -60,6 +111,24 @@ public class MainView extends javax.swing.JFrame {
         //</editor-fold>
 
         /* Create and display the form */
+         try {
+            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
+                if ("Nimbus".equals(info.getName())) {
+                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
+                    break;
+                }
+            }
+        } catch (ClassNotFoundException ex) {
+            java.util.logging.Logger.getLogger(MainView.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (InstantiationException ex) {
+            java.util.logging.Logger.getLogger(MainView.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (IllegalAccessException ex) {
+            java.util.logging.Logger.getLogger(MainView.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
+            java.util.logging.Logger.getLogger(MainView.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        }
+
+        /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
                 new MainView().setVisible(true);
@@ -68,5 +137,8 @@ public class MainView extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JTable jTable1;
     // End of variables declaration//GEN-END:variables
+
 }
